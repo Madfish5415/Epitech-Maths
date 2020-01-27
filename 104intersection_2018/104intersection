@@ -1,0 +1,165 @@
+#!/usr/bin/python3
+
+import sys
+import math
+
+
+def to_int(arg):
+    try:
+        return int(arg)
+    except ValueError:
+        exit(84)
+
+
+def error_manager():
+    if len(sys.argv) < 2:
+        exit(84)
+    if (len(sys.argv) == 2) and (sys.argv[1] != "-h"):
+        if len(sys.argv) < 9:
+            exit(84)
+        else:
+            shape = to_int(sys.argv[8])
+
+            if shape != 1 or shape != 2 or shape != 3:
+                exit(84)
+            if shape == 3 and to_int(sys.argv[8]) % 90 == 0:
+                exit(84)
+
+
+def display_help():
+    print(
+        "USAGE" "\n"
+        "\t" "./104intersection opt xp yp zp xv yv zv p" "\n"
+        "\n"
+        "DESCRIPTION" "\n"
+        "\t" "opt" "\t\t" "surface option: 1 for a sphere, 2 for a cylinder, 3 for a cone" "\n"
+        "\t" "(xp, yp, zp)" "\t" "coordinates of a point by which the light ray passes through" "\n"
+        "\t" "(xv, yv, zv)" "\t" "coordinates of a vector parallel to the light ray" "\n"
+        "\t" "p" "\t\t" "parameter: radius of the sphere, radius of the cylinder, or" "\n"
+        "\t" "\t\t" "angle formed by the cone and the Z-axis"
+    )
+
+
+def delta_calculate(a, b, c):
+    delta = b ** 2 - 4 * a * c
+    delta = int(delta * 1000)
+    delta = float(delta) / 1000
+
+    return delta
+
+
+def one_solution(point_x, point_y, point_z, vector_x, vector_y, vector_z, t):
+    x = vector_x * t + point_x
+    y = vector_y * t + point_y
+    z = vector_z * t + point_z
+
+    print("1 intersection point:")
+    print("({0:.3f}, {1:.3f}, {2:.3f})".format(x, y, z))
+
+
+def two_solution(point_x, point_y, point_z, vector_x, vector_y, vector_z, t1, t2):
+    x1 = vector_x * t1 + point_x
+    y1 = vector_y * t1 + point_y
+    z1 = vector_z * t1 + point_z
+    x2 = vector_x * t2 + point_x
+    y2 = vector_y * t2 + point_y
+    z2 = vector_z * t2 + point_z
+
+    print("2 intersection points:")
+    print("({0:.3f}, {1:.3f}, {2:.3f})".format(x1, y1, z1))
+    print("({0:.3f}, {1:.3f}, {2:.3f})".format(x2, y2, z2))
+
+
+def circle_intersection(point_x, point_y, point_z, vector_x, vector_y, vector_z, radius):
+    a = vector_x ** 2 + vector_y ** 2 + vector_z ** 2
+    b = 2 * (vector_x * point_x + vector_y * point_y + vector_z * point_z)
+    c = point_x ** 2 + point_y ** 2 + point_z ** 2 - radius ** 2
+    delta = delta_calculate(a, b, c)
+
+    print("Sphere of radius {}".format(radius))
+    print("Line passing through the point ({}, {}, {}) and parallel to the vector ({}, {}, {})"
+          .format(point_x, point_y, point_z, vector_x, vector_y, vector_z))
+    if delta < 0:
+        print("No intersection point.")
+    elif delta == 0:
+        t = (-b) / (2 * a)
+        one_solution(point_x, point_y, point_z, vector_x, vector_y, vector_z, t)
+    else:
+        t1 = ((-b) + math.sqrt(delta)) / (2 * a)
+        t2 = ((-b) - math.sqrt(delta)) / (2 * a)
+        two_solution(point_x, point_y, point_z, vector_x, vector_y, vector_z, t1, t2)
+
+
+def cylinder_intersection(point_x, point_y, point_z, vector_x, vector_y, vector_z, radius):
+    a = vector_x ** 2 + vector_y ** 2
+    b = 2 * (vector_x * point_x + vector_y * point_y)
+    c = point_x ** 2 + point_y ** 2 - radius ** 2
+    delta = delta_calculate(a, b, c)
+
+    print("Cylinder of radius {}".format(radius))
+    print("Line passing through the point ({}, {}, {}) and parallel to the vector ({}, {}, {})"
+          .format(point_x, point_y, point_z, vector_x, vector_y, vector_z))
+    if (vector_x == 0) and (vector_y == 0):
+        if math.sqrt(point_x ** 2 + point_y ** 2) == radius:
+            print("There is an infinite number of intersection points.")
+        else:
+            print("No intersection point.")
+    elif delta < 0:
+        print("No intersection point.")
+    elif delta == 0:
+        t = (-b) / (2 * a)
+        one_solution(point_x, point_y, point_z, vector_x, vector_y, vector_z, t)
+    else:
+        t1 = ((-b) + math.sqrt(delta)) / (2 * a)
+        t2 = ((-b) - math.sqrt(delta)) / (2 * a)
+        two_solution(point_x, point_y, point_z, vector_x, vector_y, vector_z, t1, t2)
+
+
+def cone_intersection(point_x, point_y, point_z, vector_x, vector_y, vector_z, angle):
+    angle_rad = ((angle * math.pi) / 180)
+    a = vector_x ** 2 + vector_y ** 2 - vector_z ** 2 * math.tan(angle_rad) ** 2
+    b = 2 * (vector_x * point_x + vector_y * point_y - vector_z * point_z * math.tan(angle_rad) ** 2)
+    c = point_x ** 2 + point_y ** 2 - point_z ** 2 * math.tan(angle_rad) ** 2
+    delta = delta_calculate(a, b, c)
+
+    print("Cone with a {} degree angle".format(angle))
+    print("Line passing through the point ({}, {}, {}) and parallel to the vector ({}, {}, {})"
+          .format(point_x, point_y, point_z, vector_x, vector_y, vector_z))
+    if delta < 0:
+        print("No intersection point.")
+    elif delta == 0:
+        t = (-b) / (2 * a)
+        one_solution(point_x, point_y, point_z, vector_x, vector_y, vector_z, t)
+    else:
+        t1 = ((-b) + math.sqrt(delta)) / (2 * a)
+        t2 = ((-b) - math.sqrt(delta)) / (2 * a)
+        two_solution(point_x, point_y, point_z, vector_x, vector_y, vector_z, t1, t2)
+
+
+def run():
+    point_x = to_int(sys.argv[2])
+    point_y = to_int(sys.argv[3])
+    point_z = to_int(sys.argv[4])
+    vector_x = to_int(sys.argv[5])
+    vector_y = to_int(sys.argv[6])
+    vector_z = to_int(sys.argv[7])
+    prop = to_int(sys.argv[8])
+
+    if sys.argv[1] == "1":
+        circle_intersection(point_x, point_y, point_z, vector_x, vector_y, vector_z, prop)
+    if sys.argv[1] == "2":
+        cylinder_intersection(point_x, point_y, point_z, vector_x, vector_y, vector_z, prop)
+    if sys.argv[1] == "3":
+        cone_intersection(point_x, point_y, point_z, vector_x, vector_y, vector_z, prop)
+
+
+def main():
+    error_manager()
+    if sys.argv[1] == "-h":
+        display_help()
+    else:
+        run()
+
+
+if __name__ == '__main__':
+    main()

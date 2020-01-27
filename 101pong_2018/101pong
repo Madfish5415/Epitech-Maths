@@ -1,0 +1,67 @@
+#!/usr/bin/python3
+
+import sys
+import math
+
+
+def to_int(arg):
+    try:
+        return int(arg)
+    except ValueError:
+        exit(84)
+
+
+def to_float(arg):
+    try:
+        return float(arg)
+    except ValueError:
+        exit(84)
+
+
+def run(x0, y0, z0, x1, y1, z1, n):
+    vector = [x1 - x0, y1 - y0, z1 - z0]
+    adj = math.sqrt(math.pow(vector[0], 2) + math.pow(vector[1], 2))
+    norm = math.sqrt(math.pow(vector[0], 2) + math.pow(vector[1], 2) + math.pow(vector[2], 2))
+    coords = [x1 + (vector[0] * n), y1 + (vector[1] * n), z1 + (vector[2] * n)]
+
+    if n <= 0:
+        exit(84)
+    if norm == 0:
+        exit(84)
+    print("The velocity vector of the ball is:")
+    print("({0:.2f}, {1:.2f}, {2:.2f})".format(vector[0], vector[1], vector[2]))
+    print("At time t + {}, ball coordinates will be:".format(n))
+    print("({0:.2f}, {1:.2f}, {2:.2f})".format(coords[0], coords[1], coords[2]))
+    if (z1 * coords[2]) <= 0:
+        print("The incidence angle is:")
+        print("{0:.2f} degrees".format(math.acos(adj / norm) * (180 / math.pi)))
+    else:
+        print("The ball won’t reach the bat.")
+
+
+def main():
+    if len(sys.argv) <= 1:
+        exit(84)
+    elif sys.argv[1] == "-h" and len(sys.argv) == 2:
+        print(
+            "USAGE" "\n"
+            "\t" "./101pong x0 y0 z0 x1 y1 z1 n" "\n"
+            "\n"
+            "DESCRIPTION" "\n"
+            "\t" "x0" "\t" "ball abscissa at time t - 1" "\n"
+            "\t" "y0" "\t" "ball ordinate at time t - 1" "\n"
+            "\t" "z0" "\t" "ball altitude at time t - 1" "\n"
+            "\t" "x1" "\t" "ball abscissa at time t" "\n"
+            "\t" "y1" "\t" "ball ordinate at time t" "\n"
+            "\t" "z1" "\t" "ball altitude at time t" "\n"
+            "\t" "n" "\t" "time shift (greater than or equal to zero, integer)"
+        )
+    elif len(sys.argv) != 8:
+        exit(84)
+    else:
+        run(to_float(sys.argv[1]), to_float(sys.argv[2]), to_float(sys.argv[3]),
+            to_float(sys.argv[4]), to_float(sys.argv[5]), to_float(sys.argv[6]),
+            to_int(sys.argv[7]))
+
+
+main()

@@ -1,0 +1,153 @@
+#!/usr/bin/python3
+
+import sys
+import math
+
+def to_int(arg):
+    try:
+        return int(arg)
+    except ValueError:
+        exit(84)
+
+
+def error_manager():
+    if (len(sys.argv) < 2):
+        exit(84)
+    if (len(sys.argv) == 2) and (sys.argv[1] != "-h"):
+        exit(84)
+    if (len(sys.argv) != 2):
+        if (len(sys.argv) != 8):
+            exit(84)
+        opt = to_int(sys.argv[1])
+        n = to_int(sys.argv[7])
+        if (opt != 1) and (opt != 2) and (opt != 3):
+            exit(84)
+        if (n < 0):
+            exit(84)
+
+def display_help():
+    print(
+        "USAGE" "\n"
+        "\t" "./105torus opt a0 a1 a2 a3 a4 n" "\n" "\n"
+        "DESCRIPTION" "\n"
+        "\t" "opt" "\t" "\t" "method option:" "\n"
+        "\t" "\t" "\t" "\t" "1 for the bisection method" "\n"
+        "\t" "\t" "\t" "\t" "2 for Newton's method" "\n" 
+        "\t" "\t" "\t" "\t" "3 for the secant method" "\n" 
+        "\t" "a[0-4]" "\t" "\t" "coefficients of the equation" "\n"
+        "\t" "n" "\t" "\t" "precision (the application of the polynomial to the solution should be smaller than 10^⁻n"
+    )
+
+def f(x):
+    a0 = to_int(sys.argv[2])
+    a1 = to_int(sys.argv[3])
+    a2 = to_int(sys.argv[4])
+    a3 = to_int(sys.argv[5])
+    a4 = to_int(sys.argv[6])
+    result = a4 * x**4 + a3 * x**3 + a2 * x**2 + a1 * x + a0
+    return result
+
+def fprime(x):
+    a1 = to_int(sys.argv[3])
+    a2 = to_int(sys.argv[4])
+    a3 = to_int(sys.argv[5])
+    a4 = to_int(sys.argv[6])
+    result = 4 * a4 * x**3 + 3 * a3 * x**2 + 2 * a2 * x + a1
+    return result
+
+def bisection():
+    n = to_int(sys.argv[7])
+
+    x1 = 0
+    x2 = 1
+
+    while (x2 - x1) > (10**-n):
+        xm = (x1 + x2) / 2
+        equation_X1 = f(x1)
+        equation_XM = f(xm)
+        if (equation_X1 * equation_XM <= 0):
+            x2 = xm
+            if ("{0:.{1}g}".format(xm, n) == "{0:.{1}g}".format(xm, n+5)):
+                print("x = {0:.{1}g}".format(xm, n))
+            else:
+                print("x = {0:.{1}f}".format(xm, n))
+        else:
+            x1 = xm
+            if ("{0:.{1}g}".format(xm, n) == "{0:.{1}g}".format(xm, n+5)):
+                print("x = {0:.{1}g}".format(xm, n))
+            else:
+                print("x = {0:.{1}f}".format(xm, n))
+        
+
+def newton():
+    n = to_int(sys.argv[7])
+
+    xn = 0.5
+
+    print("x = 0.5")
+    for i in range (0, 100):
+        equation_XN = float(f(xn))
+        equationPrime_XN = float(fprime(xn))
+        if (equationPrime_XN == 0):
+            exit(84)
+        xm = xn - (equation_XN / equationPrime_XN)
+        if (xm == 0):
+            exit(84)
+        if ((abs(xm - xn) / abs(xm)) < (10**-n)):
+            exit(0)
+        else:
+            if ("{0:.{1}g}".format(xm, n) == "{0:.{1}g}".format(xm, n+5)):
+                print("x = {0:.{1}g}".format(xm, n))
+            else:
+                print("x = {0:.{1}f}".format(xm, n))
+        xn = xm
+    exit(84)
+
+def secant():
+    n = to_int(sys.argv[7])
+
+    x0 = 0
+    x1 = 1
+    
+    for i in range (0, 200):
+        dividend = f(x1) * (x1 - x0)
+        divisor = f(x1) - f(x0)
+        if (divisor == 0):
+            exit(84)
+        xm = x1 - dividend / divisor
+        if (xm == 0):
+            exit(84)
+        if ((abs(xm - x1) / abs(xm)) < (10**-n)):
+            if ("{0:.{1}g}".format(xm, n) == "{0:.{1}g}".format(xm, n+5)):
+                print("x = {0:.{1}g}".format(xm, n))
+            else:
+                print("x = {0:.{1}f}".format(xm, n))
+            exit(0)
+        else:
+            if ("{0:.{1}g}".format(xm, n) == "{0:.{1}g}".format(xm, n+5)):
+                print("x = {0:.{1}g}".format(xm, n))
+            else:
+                print("x = {0:.{1}f}".format(xm, n))
+        x0 = x1
+        x1 = xm
+
+def run():
+    opt = to_int(sys.argv[1])
+    if (opt == 1):
+        bisection()
+    if (opt == 2):
+        newton()
+    if (opt == 3):
+        secant()
+
+
+def main():
+    error_manager()
+    if sys.argv[1] == "-h":
+        display_help()
+    else:
+        run()
+
+
+if __name__ == '__main__':
+    main()
